@@ -27,12 +27,18 @@ Cloudflare.
 ## Configurar snippets (GTM e outros)
 
 ```bash
-export GTM_ID=GTM-XXXXXXX
+cp .env.example .env
 ```
 
-Sem a variável, o build funciona normalmente mas avisa e deixa o
-placeholder (`{{GTM_ID}}`) sem preencher — propositalmente quebrado, pra
-não subir sem querer um snippet que não funciona de verdade.
+Edite `.env` e preencha o valor real (`GTM_ID=GTM-XXXXXXX`). Esse arquivo
+não é versionado — cada pessoa mantém o próprio, e o build já lê ele
+sozinho, sem precisar exportar variável de ambiente na mão toda vez.
+
+Sem o `.env` (ou sem a variável dentro dele), o build funciona
+normalmente mas avisa e deixa o placeholder (`{{GTM_ID}}`) sem preencher
+— propositalmente quebrado, pra não subir sem querer um snippet que não
+funciona de verdade. Se preferir variável de ambiente de verdade (ex.:
+CI), também funciona — `.env` só tem prioridade quando os dois existem.
 
 **Adicionar outro script** (Pixel do Facebook, outro analytics, o que
 for): cria um arquivo novo em `templates/head/`, usa `{{NOME_DA_VAR}}` pra
