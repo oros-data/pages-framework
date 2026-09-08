@@ -68,6 +68,20 @@
     window.dataLayer.push(payload);
   };
 
+  // Hash pro formato que Enhanced Conversions (Google) e Advanced Matching
+  // (Meta) esperam: SHA-256 de e-mail/telefone normalizado (minúsculo, sem
+  // espaço). NUNCA passe o valor cru pro track() — sempre hasheie antes.
+  // Telefone deve estar em E.164 (+5511999999999) antes de chamar isso.
+  window.hashForMatching = async function (value) {
+    if (!value) return null;
+    var normalized = String(value).trim().toLowerCase();
+    var data = new TextEncoder().encode(normalized);
+    var hashBuffer = await window.crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(hashBuffer))
+      .map(function (b) { return b.toString(16).padStart(2, "0"); })
+      .join("");
+  };
+
   // Captura automática de clique — nenhum botão precisa de onclick manual.
   function elementInfo(el) {
     return {
