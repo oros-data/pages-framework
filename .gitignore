@@ -1,5 +1,7 @@
 node_modules/
 .wrangler/
+.netlify/
+.vercel/
 .dev.vars
 .env
 utils/venv/

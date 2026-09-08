@@ -6,9 +6,15 @@
     "build": "utils/venv/bin/python utils/build.py",
     "dev": "npm run build && wrangler dev",
     "deploy": "npm run build && wrangler deploy",
-    "deploy:staging": "npm run build && wrangler deploy --env staging"
+    "deploy:staging": "npm run build && wrangler deploy --env staging",
+    "deploy:vercel": "npm run build && vercel --prod",
+    "deploy:vercel:staging": "npm run build && vercel",
+    "deploy:netlify": "npm run build && netlify deploy --prod --dir=public",
+    "deploy:netlify:staging": "npm run build && netlify deploy --dir=public"
   },
   "devDependencies": {
+    "netlify-cli": "^27.5.0",
+    "vercel": "^59.11.7",
     "wrangler": "^4.91.0"
   }
 }
