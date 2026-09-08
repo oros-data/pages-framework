@@ -3,3 +3,4 @@ node_modules/
 .dev.vars
 utils/venv/
 utils/__pycache__/
+public/
