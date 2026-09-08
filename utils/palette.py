@@ -3,7 +3,10 @@
 Não roda sozinho sem ambiente preparado — veja AGENTS.md (Python, venv,
 requirements.txt) antes de usar.
 
-    utils/venv/bin/python utils/palette.py <imagem> [--count N] [--out public/theme.css]
+    utils/venv/bin/python utils/palette.py <imagem> [--count N] [--out src/theme.css]
+
+Escreve em src/, não em public/ — public/ é gerado pelo build.py (que
+copia src/ pra lá), nunca editado direto.
 """
 
 from __future__ import annotations
@@ -15,7 +18,7 @@ from pathlib import Path
 from colorthief import ColorThief
 
 DEFAULT_COUNT = 6
-DEFAULT_OUT = Path(__file__).parent.parent / "public" / "theme.css"
+DEFAULT_OUT = Path(__file__).parent.parent / "src" / "theme.css"
 
 RGB = tuple[int, int, int]
 
