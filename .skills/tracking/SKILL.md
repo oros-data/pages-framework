@@ -52,9 +52,12 @@ atribuição e curadoria de dado sensível.
 
 ---
 
-## `track()` — implementação de referência
+## `track()` — implementação
 
-Ver `tracking.js` nesta pasta. Resumo do contrato:
+A implementação real (única cópia, não duplicar) mora em `src/tracking.js`
+— é código que roda de verdade no navegador do visitante, por isso vive em
+`src/` como qualquer outro asset, não dentro desta pasta de skill. Leia e
+edite ele lá diretamente. Resumo do contrato:
 
 ```js
 track(eventName, { ...propriedades_curadas })
