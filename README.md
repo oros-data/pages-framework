@@ -11,10 +11,12 @@ Cloudflare.
 - `src/` — **fonte de verdade.** Edite as páginas aqui, nunca em `public/`.
 - `public/` — **100% gerado pelo build.** Não editar direto, some/reaparece
   a cada build. Não é versionado (veja `.gitignore`).
-- `templates/gtm-snippet.html` — snippet do GTM, com placeholder `{{GTM_ID}}`
-  preenchido no build a partir da variável de ambiente `GTM_ID`.
-- `utils/build.py` — monta `public/` a partir de `src/`, injetando o GTM
-  em toda página que tiver o marcador `<!-- build:gtm -->` no `<head>`.
+- `templates/head/` — snippets a injetar no `<head>` de toda página (GTM,
+  Pixel do Facebook, qualquer outro). **Qualquer `.html` aqui entra
+  automaticamente** — não precisa mexer no `build.py` pra adicionar um.
+- `utils/build.py` — monta `public/` a partir de `src/`, concatenando todo
+  arquivo de `templates/head/` e injetando no marcador `<!-- build:head -->`
+  de cada página.
 - `utils/palette.py` — extrai paleta de cor de uma imagem, escreve
   `src/theme.css` (veja `AGENTS.md` pro ambiente Python).
 - `worker.js` — serve os arquivos de `public/`. Ainda sem roteamento
@@ -22,15 +24,20 @@ Cloudflare.
 - `wrangler.jsonc` — config de deploy, com um ambiente `staging` já
   configurado ao lado da produção.
 
-## Configurar o GTM
+## Configurar snippets (GTM e outros)
 
 ```bash
 export GTM_ID=GTM-XXXXXXX
 ```
 
-Sem isso, o build funciona normalmente mas avisa e deixa o placeholder
-`{{GTM_ID}}` sem preencher — propositalmente quebrado, pra não subir sem
-querer um snippet que não funciona de verdade.
+Sem a variável, o build funciona normalmente mas avisa e deixa o
+placeholder (`{{GTM_ID}}`) sem preencher — propositalmente quebrado, pra
+não subir sem querer um snippet que não funciona de verdade.
+
+**Adicionar outro script** (Pixel do Facebook, outro analytics, o que
+for): cria um arquivo novo em `templates/head/`, usa `{{NOME_DA_VAR}}` pra
+qualquer valor que precise vir de variável de ambiente, e pronto — entra
+automaticamente em toda página no próximo build. Nenhum código a mexer.
 
 ## Local
 
