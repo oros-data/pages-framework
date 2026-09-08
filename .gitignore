@@ -4,3 +4,4 @@ node_modules/
 utils/venv/
 utils/__pycache__/
 public/
+__pycache__/
