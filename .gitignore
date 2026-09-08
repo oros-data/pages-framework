@@ -6,3 +6,10 @@ utils/venv/
 utils/__pycache__/
 public/
 __pycache__/
+
+# conteúdo real do cliente (imagem de marca, referência) — só a estrutura
+# de pasta é do template, o conteúdo é específico de quem fork/clonar
+references/company/images/*
+!references/company/images/.gitkeep
+references/inspiration/*
+!references/inspiration/.gitkeep
