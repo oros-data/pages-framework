@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "oros-pages",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-07",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "env": {
+    "staging": {
+      "name": "oros-pages-staging",
+      "main": "worker.js",
+      "assets": {
+        "directory": "./public",
+        "binding": "ASSETS",
+        "run_worker_first": true
+      }
+    }
+  }
+}
