@@ -18,31 +18,62 @@ gitignored, `npm run build`/`dev`/`deploy` recriam sozinhos).
 
 Tudo em `utils/` (`palette.py`, extração de paleta de cor; `build.py`,
 monta `public/` a partir de `src/`) roda em Python, **nunca** entra em
-`public/` nem é servido pelo Worker. Antes de tocar em qualquer script
-Python aqui, sempre confirme o ambiente, nessa ordem — este projeto roda no
-computador de terceiros (alunos), então nada disso pode ser assumido como
-já pronto:
+`public/` nem é servido pelo Worker. Este projeto roda no computador de
+terceiros (alunos) — sistema operacional desconhecido até este momento,
+então nada abaixo pode ser assumido como já pronto, e o **primeiro passo
+é sempre identificar o ambiente**, antes de qualquer comando de Python.
 
-1. **Python instalado?**
-   ```bash
-   python3 --version
-   ```
-   Se não existir, oriente a instalação (não tenta instalar Python sozinho —
-   isso é decisão do usuário, sistema operacional dele).
+### 0. Detectar sistema operacional
 
-2. **Venv criado?** Sempre em `utils/venv/` (nunca um venv global/do sistema).
-   ```bash
-   test -d utils/venv || python3 -m venv utils/venv
-   ```
+Cada SO muda o caminho do binário dentro do venv e às vezes o próprio
+nome do comando Python. Detecte antes de escolher qual comando rodar:
 
-3. **`requirements.txt` instalado dentro do venv?** Nunca com o `pip` do
-   sistema — sempre pelo binário do próprio venv.
-   ```bash
-   utils/venv/bin/pip install -r utils/requirements.txt
-   ```
+```bash
+uname -s 2>/dev/null || echo "sem uname — provavelmente Windows (cmd/PowerShell)"
+```
 
-Só depois desses três passos confirmados, rode o script com o Python do
-venv (nunca `python3` do sistema, nunca depender de `source venv/bin/activate`
+- **`Linux` ou `Darwin` (macOS)**: binário do venv fica em `utils/venv/bin/`
+  (`utils/venv/bin/python`, `utils/venv/bin/pip`).
+- **Sem `uname` (Windows, cmd/PowerShell nativo, não WSL)**: binário do
+  venv fica em `utils/venv/Scripts/` (`utils/venv/Scripts/python.exe`,
+  `utils/venv/Scripts/pip.exe`) — caminho com `\`, não `/`.
+- **WSL**: conta como Linux (tem `uname -s` = `Linux`) — mesmo caminho de
+  Unix, mesmo dentro do Windows.
+
+O resto deste documento usa a forma Unix (`utils/venv/bin/...`) como
+exemplo — troque para `utils\venv\Scripts\...` se a detecção acima
+indicar Windows nativo.
+
+### 1. Python instalado?
+
+```bash
+python3 --version   # Linux/macOS
+python --version    # Windows costuma só ter "python", não "python3"
+```
+
+Se não existir, oriente a instalação (não tenta instalar Python sozinho —
+isso é decisão do usuário, sistema operacional dele).
+
+### 2. Venv criado?
+
+Sempre em `utils/venv/` (nunca um venv global/do sistema), usando o
+caminho identificado no passo 0:
+
+```bash
+test -d utils/venv || python3 -m venv utils/venv
+```
+
+### 3. `requirements.txt` instalado dentro do venv?
+
+Nunca com o `pip` do sistema — sempre pelo binário do próprio venv
+(`utils/venv/bin/pip` ou `utils/venv/Scripts/pip.exe`, conforme o passo 0):
+
+```bash
+utils/venv/bin/pip install -r utils/requirements.txt
+```
+
+Só depois desses passos confirmados, rode o script com o Python do venv
+(nunca `python3` do sistema, nunca depender de `source venv/bin/activate`
 ter surtido efeito — invoque o binário direto):
 
 ```bash
