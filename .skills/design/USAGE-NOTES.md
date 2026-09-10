@@ -39,5 +39,14 @@ Domínios úteis pro nosso caso: `color`, `typography`, `ux` (acessibilidade
 de seção, não visual). Evite `--design-system` e `--stack` sem revisar
 manualmente o resultado.
 
-Nada disso é servido pelo Worker nem entra em `public/` — é ferramenta de
-consulta em tempo de desenvolvimento, mesma categoria de `utils/`.
+## CSS novo vs regra que já existe
+
+Antes de entregar estilo: a classe nova tem que **ganhar** da regra
+genérica já na folha. `section.chapter { padding: 3rem 0 }` (dois
+seletores) vence `.form-chapter` sozinho — padding lateral nunca aplica.
+Use o mesmo elemento + as duas classes (`section.chapter.form-chapter`)
+ou não reaproveite a seção genérica no card.
+
+Não feche CSS só lendo a folha. Renderize (browser ou `npm run dev`) e
+confira padding, overflow e viewport estreita. Sem isso, o usuário é
+quem acha o texto colado na borda.

@@ -14,6 +14,11 @@ A página só empurra `dataLayer` (`src/tracking.js`, `.skills/tracking/`).
 container: `templates/head/gtm.html` + `GTM_ID` no `.env`.
 
 Fonte do container importável: `templates/gtm/container.json`.
+Esse arquivo precisa **importar de verdade** num GTM Web (Admin →
+Import → merge). Não montar JSON de memória. Tipos de trigger são
+`PAGEVIEW` e `CUSTOM_EVENT` (maiúsculo). Toda variável/trigger/tag leva
+`fingerprint`. Variável leva `formatValue`. Tag `GA4 evento` leva
+`measurementIdOverride` (não herda da tag GA4). Nomes sem `<` `>`.
 
 Não criar skill por plataforma de ads (Meta / GA4 / Ads). Tags e
 constantes desta skill cobrem os três; o `dataLayer` é `.skills/tracking/`.
@@ -50,28 +55,27 @@ Só faltam os IDs de destino.
 
 ## Contrato dataLayer → variáveis GTM
 
-Tudo abaixo é **Data Layer Variable** (versão 2), nome da chave = nome
-no payload do `track()`. Constantes são preenchidas à mão no GTM.
+Nome no GTM = chave do `dataLayer` (sem `DLV` / `Constant`). Constantes
+à mão no GTM.
 
-| Variável GTM | Chave dataLayer / valor | Notas |
+| Nome no GTM | Chave / valor | Notas |
 |---|---|---|
 | `Event` | built-in | nome do evento (`page_view`, `click`, …) |
-| `DLV - event_id` | `event_id` | único por disparo; Meta `eventID` / CAPI |
-| `DLV - event_time` | `event_time` | unix s; CAPI `event_time` |
-| `DLV - anon_id` | `anon_id` | UUID permanente; Meta `external_id` |
-| `DLV - session_id` | `session_id` | |
-| `DLV - email_hash` | `email_hash` | SHA-256 **já feito** na página. Tag **não** hasheia de novo. |
-| `DLV - phone_hash` | `phone_hash` | idem, telefone já em E.164 antes do hash |
-| `DLV - gclid` | `gclid` | só se esta **sessão** teve `gclid` na URL |
-| `DLV - fbclid` | `fbclid` | só se esta sessão teve `fbclid` na URL |
-| `DLV - fbc` | `fbc` | persistido 90d; Meta, inclusive visita orgânica depois |
-| `DLV - fbp` | `fbp` | persistido 90d |
-| `DLV - utm_source` (etc.) | `utm_*` | sessão; **não** reenviar campanha velha no GA4 |
-
-| `Constant - GA4 Measurement ID` | `G-XXXX` | cliente |
-| `Constant - Meta Pixel ID` | `123456789` | cliente |
-| `Constant - Google Ads Conversion ID` | `AW-XXXX` | cliente, opcional |
-| `Constant - Google Ads Conversion Label` | label | cliente, opcional |
+| `event_id` | `event_id` | único por disparo; Meta `eventID` / CAPI |
+| `event_time` | `event_time` | unix s; CAPI `event_time` |
+| `anon_id` | `anon_id` | UUID permanente; Meta `external_id` |
+| `session_id` | `session_id` | |
+| `email_hash` | `email_hash` | SHA-256 **já feito** na página. Tag **não** hasheia de novo. |
+| `phone_hash` | `phone_hash` | idem, telefone já em E.164 antes do hash |
+| `gclid` | `gclid` | só se esta **sessão** teve `gclid` na URL |
+| `fbclid` | `fbclid` | só se esta sessão teve `fbclid` na URL |
+| `fbc` | `fbc` | persistido 90d; Meta, inclusive visita orgânica depois |
+| `fbp` | `fbp` | persistido 90d |
+| `utm_source` | `utm_source` | sessão; **não** reenviar campanha velha no GA4 |
+| `GA4 ID` | `G-XXXX` | constante, cliente |
+| `Pixel ID` | número | constante, cliente |
+| `Google Ads ID` | `AW-XXXX` | constante, opcional |
+| `Google Ads label` | label | constante, opcional |
 
 Não mapear `gclid`/`utm_*` velhos como se fossem aquisição da visita
 atual. Conversion Linker grava o cookie do Google Ads sozinho. IP
@@ -98,7 +102,7 @@ fb.1.{timestamp_ms}.{fbclid}
 
 A página monta isso em `src/tracking.js` e manda `fbc` em **todo**
 `track()` enquanto o TTL de 90 dias valer — **inclusive** se a visita
-atual for orgânica. GTM só lê `DLV - fbc`. Não remontar `fbc` no GTM.
+atual for orgânica. GTM só lê `{{fbc}}`. Não remontar `fbc` no GTM.
 
 **Dois anúncios em dois dias:** a spec *Store ClickID* da Meta manda
 **atualizar** `_fbc` quando o `fbclid` da URL **não** é o que já está
@@ -115,26 +119,25 @@ também cria `_fbp`; mandar o nosso no `init` evita dois IDs.
 
 | Tag | Tipo GTM | Disparo | Pausa se faltar |
 |---|---|---|---|
-| GA4 Configuration | `gaawc` | All Pages; `sendPageView` false | Measurement ID |
-| GA4 Event | `gaawe` | custom event regex dos eventos nossos; nome = `{{Event}}` | Measurement ID |
-| Conversion Linker | `gclidw` | All Pages | nunca (sem ID) |
-| Google Ads Conversion | `awct` | `lead_capturado` | Conversion ID+label |
-| Meta Pixel base | Custom HTML `fbq('init')` + PageView | `page_view` | Pixel ID |
-| Meta Lead | Custom HTML `fbq('track','Lead')` | `lead_capturado` | Pixel ID |
+| GA4 | `gaawc` | Todas as páginas; `sendPageView` false | `GA4 ID` |
+| GA4 evento | `gaawe` | regex dos eventos nossos; nome = `{{Event}}`; **precisa** de `measurementIdOverride` = `{{GA4 ID}}` | `GA4 ID` |
+| Conversion Linker | `gclidw` | Todas as páginas | nunca (sem ID) |
+| Google Ads — lead | `awct` | `lead_capturado` | `Google Ads ID` + label |
+| Pixel | Custom HTML `fbq('init')` + PageView | `page_view` | `Pixel ID` |
+| Pixel — Lead | Custom HTML `fbq('track','Lead')` | `lead_capturado` | `Pixel ID` |
 
 Eventos cobertos pelo regex GA4:
 `page_view|click|form_submit|lead_capturado|^cta_`.
 
 GA4 params sugeridos no evento: `anon_id`, `gclid`, UTMs. User-provided
-data (enhanced conversions): `sha256_email_address` ← `DLV - email_hash`
+data (enhanced conversions): `sha256_email_address` ← `{{email_hash}}`
 (já hash; marcar na UI como hashed se o campo existir).
 
-Meta `init` / `track` userData: `em` ← email_hash, `ph` ← phone_hash,
-`fbc`, `fbp`, `external_id` ← anon_id. Valores vazios: **omitir**, não
-mandar string vazia. Todo `fbq('track', …)` leva
-`{eventID: '{{DLV - event_id}}'}` — sem isso o CAPI não consegue
-deduplicar. Google Ads: `orderId` ← `event_id` na conversão, quando a
-tag tiver o campo. Não gerar `event_id` no GTM.
+Meta `init` / `track` userData: `em` ← `{{email_hash}}`, `ph` ←
+`{{phone_hash}}`, `fbc`, `fbp`, `external_id` ← `{{anon_id}}`. Valores
+vazios: **omitir**, não mandar string vazia. Todo `fbq('track', …)` leva
+`{eventID: '{{event_id}}'}`. Google Ads: `orderId` ← `{{event_id}}`.
+Não gerar `event_id` no GTM.
 
 Não colocar Pixel/gtag no `templates/head/` — duplica o GTM.
 
@@ -148,7 +151,7 @@ O cookie é **armazenamento no browser**. O parâmetro é o que a tag/CAPI
 | URL `fbclid` | não vai cru no CAPI | click id do anúncio Meta | a cada clique de anúncio |
 | `_fbc` (e nosso `localStorage`) | `user_data.fbc` / `fbq` userData | `fb.1.{ms}.{fbclid}` | **last-click**: `fbclid` novo na URL substitui o antigo (spec Meta). Sem `fbclid` na URL, reenvia o gravado (até 90 d) |
 | `_fbp` | `user_data.fbp` | `fb.1.{ms}.{random}` identidade do browser | **nunca** no segundo anúncio; só se não existir |
-| URL `gclid` | Ads lê cookie, não nosso DLV eterno | click Google | Conversion Linker `_gcl_aw` last-click |
+| URL `gclid` | Ads lê cookie, não o `gclid` eterno no dataLayer | click Google | Conversion Linker `_gcl_aw` last-click |
 | `_gcl_aw` | tag Google Ads | gclid persistido ~90 d | novo `gclid` na URL sobrescreve |
 
 Dois anúncios Meta D1 e D2: no D2 o `fbc` é o do D2. Conversão no D3 sem novo clique: ainda o `fbc` do D2. O do D1 não volta.
