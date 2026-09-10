@@ -25,16 +25,22 @@ não consegue completar isso sozinho. Peça pro usuário rodar uma vez,
 antes de qualquer deploy:
 
 ```bash
-npx vercel login
+npx --yes vercel@59.11.7 login
 ```
 
 Plano gratuito ("Hobby") não pede cartão de crédito — dá pra testar de
 verdade sem custo.
 
-**Achado ao testar (visto na mensagem de erro do próprio CLI, não
-confirmado até o fim):** existe `vercel deploy --temporary`, que promete
-um deploy reivindicável depois, sem login prévio. Não terminei de validar
-essa via — vale confirmar antes de recomendar de verdade.
+**Deploy anônimo (validado):** `vercel deploy --temporary` na raiz do
+repo **falha** — o CLI tenta mandar o fonte e a Vercel exige output
+pré-built. O que funciona, depois do `npm run build`:
+
+```bash
+npx --yes vercel@59.11.7 deploy public --temporary --yes
+```
+
+Expira em 60 minutos até alguém reivindicar (`vercel login` + o link de
+claim que o CLI imprime). Site permanente continua precisando de login.
 
 ## Deploy
 
@@ -56,5 +62,37 @@ explícito).
 - Sem `worker.js`, sem binding de asset — Vercel serve `public/` direto.
 - `GTM_ID`/outros valores de `.env` continuam resolvidos no build, antes
   do deploy — isso não muda entre provedores, é sempre o mesmo `.env`.
-- Domínio próprio: configurado no painel da Vercel, fora do escopo desta
-  skill (mesma lógica em qualquer provedor — DNS não é decisão de deploy).
+- Domínio próprio: ver seção DNS abaixo.
+
+## DNS / domínio próprio
+
+O deploy **não** mexe em DNS. Enquanto não houver domínio comprado, a
+URL grátis basta:
+
+- produção: `https://<projeto>.vercel.app` (estável)
+- staging/preview: `https://<projeto>-<hash>-<time>.vercel.app` (cada
+  deploy uma URL nova)
+
+Preview em time/Hobby costuma cair em **Deployment Protection** (SSO da
+Vercel). Sem login da equipe, o curl/visitante anônimo toma 302. Para a
+live, em Project → Settings → Deployment Protection, liberar preview
+se o aluno precisar de URL pública de staging.
+
+Domínio customizado (depois de ter o domínio no registrador):
+
+1. No projeto: Settings → Domains → adicionar `exemplo.com` e/ou `www`.
+2. No DNS do registrador (ou no provedor de DNS, se não for a Vercel):
+   - **apex** (`exemplo.com`): registro **A** para o IP que o painel
+     mostrar (hoje o genérico é `76.76.21.21` — confirme no painel).
+   - **subdomínio** (`www` ou `staging`): **CNAME** para o valor do
+     painel (ex. `cname.vercel-dns-0.com` ou o CNAME específico do
+     projeto).
+3. SSL a Vercel emite sozinha depois do DNS propagar.
+
+Não apontar nameserver para a Vercel a menos que queiram gerenciar **todo**
+o DNS lá (e-mail MX incluso). Só A/CNAME no registrador atual é o caminho
+mínimo. Staging com domínio próprio (ex. `staging.exemplo.com`) é o mesmo
+fluxo, apontando o CNAME para o projeto e associando o host ao environment
+de preview no painel.
+
+O `wrangler.jsonc` / este repo **não** guardam registros DNS.

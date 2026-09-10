@@ -4,18 +4,16 @@
   "type": "module",
   "scripts": {
     "init": "python3 utils/init.py",
-    "build": "utils/venv/bin/python utils/build.py",
-    "dev": "npm run build && wrangler dev",
-    "deploy": "npm run build && wrangler deploy",
-    "deploy:staging": "npm run build && wrangler deploy --env staging",
-    "deploy:vercel": "npm run build && vercel --prod",
-    "deploy:vercel:staging": "npm run build && vercel",
-    "deploy:netlify": "npm run build && netlify deploy --prod --dir=public",
-    "deploy:netlify:staging": "npm run build && netlify deploy --dir=public"
-  },
-  "devDependencies": {
-    "netlify-cli": "^27.5.0",
-    "vercel": "^59.11.7",
-    "wrangler": "^4.91.0"
+    "build": "python3 utils/build.py",
+    "dev": "npm run build && python3 -m http.server --directory public 8787",
+    "dev:cloudflare": "npm run build && npx --yes wrangler@4.91.0 dev",
+    "deploy": "python3 utils/need_provider.py producao",
+    "deploy:staging": "python3 utils/need_provider.py staging",
+    "deploy:cloudflare": "npm run build && npx --yes wrangler@4.91.0 deploy",
+    "deploy:cloudflare:staging": "npm run build && npx --yes wrangler@4.91.0 deploy --env staging",
+    "deploy:vercel": "npm run build && npx --yes vercel@59.11.7 --prod --yes",
+    "deploy:vercel:staging": "npm run build && npx --yes vercel@59.11.7 --yes",
+    "deploy:netlify": "npm run build && npx --yes --ignore-scripts netlify-cli@27.5.0 deploy --prod --dir=public",
+    "deploy:netlify:staging": "npm run build && npx --yes --ignore-scripts netlify-cli@27.5.0 deploy --dir=public"
   }
 }

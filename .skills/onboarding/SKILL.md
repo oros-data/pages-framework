@@ -21,14 +21,22 @@ Não pergunta nem configura provedor.
 **Pergunta:** onde a página vai ser publicada?
 
 Não há provedor padrão de publicação. `public/` sai igual pra qualquer
-host estático. Cloudflare só tem extras locais (`worker.js`,
-`wrangler.jsonc`, `npm run dev`).
+host estático. Local é sempre `npm run dev` (Python, sem CLI de host).
+Cloudflare só tem extras (`worker.js`, `wrangler.jsonc`,
+`npm run dev:cloudflare`).
 
 - **Cloudflare** → `.skills/deploy-cloudflare/`.
 - **Vercel / Netlify / outro com skill** → `.skills/deploy-<provedor>/`.
 - **Ainda não existe skill** (ex.: FTP/Hostinger): avise que o caminho
   de deploy específico não foi construído — `public/` já serve pra
   subir na mão. Só construa skill depois de cliente real pedindo.
+
+Domínio próprio / DNS: **não** perguntar no init e **não** inventar
+registro. Depois do provedor escolhido, a seção DNS daquela skill
+(`deploy-vercel`, `deploy-netlify`, `deploy-cloudflare`) é a fonte.
+Sem domínio comprado, usar a URL `*.vercel.app` / `*.netlify.app` /
+workers.dev. Preview pode estar atrás de SSO (Vercel) ou login Netlify
+— ver a skill do provedor antes de achar que o deploy falhou.
 
 ## 2. Marca / identidade visual
 
@@ -60,10 +68,30 @@ como base?
 
 ---
 
+## 4. IDs de medição (GTM)
+
+Tracking na página é sempre on (`.skills/tracking/`). Destinos ficam
+no container (`.skills/gtm/`). Não perguntar se “quer pixel”.
+
+**Pergunta:** quais destes IDs você já tem? (pular o que não tiver —
+pausar a tag correspondente depois do import)
+
+- ID do container GTM (`GTM-…`) → `.env` `GTM_ID`
+- GA4 (`G-…`)
+- Meta Pixel (número)
+- Google Ads conversão (ID `AW-…` + label) — só se já anunciar no Google
+
+Depois: importar `templates/gtm/container.json` (merge), preencher
+constantes, Preview numa URL de staging **pública**, Publish. Detalhe
+na skill GTM. API do Tag Manager fica de fora (OAuth/GCP).
+
+Não perguntar “first ou last click?”. Atribuição: GA4 no painel; Meta/
+Ads via `fbc` last-click e Conversion Linker. Não inventar skill por
+plataforma nem campos `first_utm_*` no código — `.skills/tracking/`
+princípio 7.
+
 ## O que não entra nesse roteiro
 
-- **Tracking**: sempre ativo, independente de tudo acima — a skill de
-  tracking (`.skills/tracking/`) não depende de o cliente ter
-  formulário de captura ou não. Funciona igual em qualquer página, sem
-  pergunta de onboarding pra "ligar".
+- **Ligar/desligar tracking**: não perguntamos — ver §4 e `.skills/tracking/`.
+- **Modelo de atribuição (first/last)**: não perguntamos — ver §4.
 - **Quantidade de página**: não perguntamos — ver nota no topo.

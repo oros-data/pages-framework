@@ -7,8 +7,11 @@ Instruções para agentes (e humanos) trabalhando neste projeto.
 Template de páginas rápidas (HTML + JS quando precisar). A fonte é
 `src/`; um passo de build gera `public/` pronto pra qualquer host
 estático (Cloudflare, Netlify, Vercel, FTP, etc.). Cloudflare tem
-extras (`worker.js`, `wrangler.jsonc`, `npm run dev`) — o init do
-projeto **não** escolhe provedor. Veja o `README.md`.
+extras (`worker.js`, `wrangler.jsonc`, `npm run dev:cloudflare`) — o
+init do projeto **não** escolhe provedor. `npm run dev` é o
+`http.server` do Python, sem CLI de host. DNS: skill
+`deploy-<provedor>`. GTM: `.skills/gtm/` (import JSON, sem API).
+Veja o `README.md`.
 
 **`src/` é a fonte de verdade. `public/` é 100% gerado — nunca edite lá
 direto**, e não se surpreenda se ele nem existir num clone limpo (é
@@ -19,10 +22,13 @@ gitignored, `npm run build`/`dev`/`deploy` recriam sozinhos).
 Tudo em `utils/` (`init.py`, identidade do projeto; `palette.py`,
 extração de paleta; `build.py`, monta `public/` a partir de `src/`)
 roda em Python, **nunca** entra em `public/` nem é servido no deploy.
-`init.py` é stdlib — pode rodar com `python3` do sistema, sem venv. Este projeto roda no computador de
-terceiros (alunos) — sistema operacional desconhecido até este momento,
-então nada abaixo pode ser assumido como já pronto, e o **primeiro passo
-é sempre identificar o ambiente**, antes de qualquer comando de Python.
+`init.py` e `build.py` são stdlib — rodam com `python3` do sistema,
+sem venv. Venv só entra em `palette.py` (Pillow).
+
+Este projeto roda no computador de terceiros (alunos) — sistema
+operacional desconhecido até este momento, então nada abaixo pode ser
+assumido como já pronto, e o **primeiro passo é sempre identificar o
+ambiente**, antes de qualquer comando de Python.
 
 ### 0. Detectar sistema operacional
 
@@ -79,8 +85,8 @@ ter surtido efeito — invoque o binário direto):
 
 ```bash
 python3 utils/init.py "Nome do projeto"   # stdlib, sem venv
+python3 utils/build.py                    # stdlib, sem venv
 utils/venv/bin/python utils/palette.py <imagem>
-utils/venv/bin/python utils/build.py
 ```
 
 `npm run build`/`dev`/`deploy` já chamam `utils/build.py` sozinhos — só rode

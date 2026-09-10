@@ -26,7 +26,9 @@ título placeholder de `src/index.html` se ainda estiver o do template.
 4. `cp .env.example .env` e preencha `GTM_ID` (e o que mais os snippets
    de `templates/head/` pedirem).
 5. Hospedagem é pergunta de onboarding (`.skills/onboarding/`), na hora
-   do deploy — não do init.
+   do deploy — não do init. DNS/domínio próprio está na skill do
+   provedor escolhido. GTM: `.skills/gtm/` + import de
+   `templates/gtm/container.json` (não é API).
 
 ## Estrutura
 
@@ -41,6 +43,8 @@ título placeholder de `src/index.html` se ainda estiver o do template.
   de cada página.
 - `utils/palette.py` — extrai paleta de cor de uma imagem, escreve
   `src/theme.css` (veja `AGENTS.md` pro ambiente Python).
+- `templates/gtm/container.json` — import no Tag Manager (GA4, Meta,
+  Ads). Ver `.skills/gtm/`.
 - `utils/init.py` — identidade do projeto no clone (stdlib; sem venv).
 - `worker.js` — extra Cloudflare: serve `public/` via binding `ASSETS`.
   Passthrough; os outros provedores ignoram este arquivo.
@@ -71,45 +75,53 @@ automaticamente em toda página no próximo build. Nenhum código a mexer.
 
 ## Local
 
+Não precisa de `npm install`. O projeto não tem dependências npm —
+Python 3 cobre build e o servidor local; Node só entra na hora do
+deploy, via `npx` (baixa o CLI daquele provedor, não instala no SO).
+
 ```bash
-npm install
-npm run build    # src/ → public/  (agnóstico ao provedor)
-npm run dev      # extra Cloudflare: build + wrangler dev
+python3 utils/init.py "Nome do projeto"   # uma vez
+cp .env.example .env                      # GTM etc.
+npm run dev                               # build + http://127.0.0.1:8787
 ```
 
-`npm run dev` usa Wrangler porque já está no projeto e espelha o
-Worker. Para publicar em outro host, o que importa é `public/` depois
-do build — o CLI do provedor (Vercel, Netlify, …) serve essa pasta.
-
-**Se `npm install` falhar** compilando `sharp` (dependência do
-`netlify-cli`, só usada num recurso opcional de otimização de imagem no
-dev server deles) — comum em versão de Node muito recente sem binário
-pré-compilado disponível ainda — rode `npm install --ignore-scripts`.
-Confirmado que o deploy continua funcionando normal sem isso.
+`npm run dev` serve `public/` com o `http.server` da stdlib do Python
+(porta 8787). Não usa Wrangler. Extra Cloudflare, se quiser o Worker
+local: `npm run dev:cloudflare` (baixa `wrangler` na hora).
 
 ## Deploy
 
-Não há provedor padrão de publicação. Cada um tem skill em
-`.skills/deploy-<nome>/` (login, staging vs produção, o que muda).
+Não há provedor padrão. Cada um tem skill em `.skills/deploy-<nome>/`
+(login, o que muda em staging). O CLI **não** vai no computador do
+aluno nem em `node_modules`: o script chama `npx --yes pacote@version`.
 
-Cloudflare (`worker.js` + `wrangler.jsonc`) — extras no repo:
-
-```bash
-npm run deploy:staging   # ambiente de staging
-npm run deploy           # produção
-```
-
-Outros provedores (servem `public/` direto):
+Staging (URL de teste, não produção):
 
 ```bash
-npm run deploy:vercel:staging   # Vercel — preview
-npm run deploy:vercel           # Vercel — produção
-
-npm run deploy:netlify:staging  # Netlify — draft
-npm run deploy:netlify          # Netlify — produção
+npm run deploy:cloudflare:staging
+npm run deploy:vercel:staging
+npm run deploy:netlify:staging
 ```
 
-Todos rodam o build (`src/` → `public/`) antes de fato dar o deploy.
+Produção:
+
+```bash
+npm run deploy:cloudflare
+npm run deploy:vercel
+npm run deploy:netlify
+```
+
+`npm run deploy` / `deploy:staging` sem o nome do provedor só lembram
+esses comandos e saem com erro — de propósito.
+
+Login (uma vez por máquina, no browser):
+
+```bash
+npx --yes wrangler@4.91.0 login
+npx --yes vercel@59.11.7 login
+npx --yes --ignore-scripts netlify-cli@27.5.0 login
+```
+
 Hospedagem tradicional via FTP (Hostinger, etc.) ainda não tem skill —
 ver `.skills/deploy-cloudflare/SKILL.md` pro motivo.
 

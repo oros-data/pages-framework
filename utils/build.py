@@ -1,7 +1,7 @@
 """Monta public/ a partir de src/, injetando os snippets de templates/head/.
 
-public/ é 100% gerado — nunca edite ali direto, edite src/. Precisa do
-mesmo ambiente Python de utils/palette.py (veja AGENTS.md).
+public/ é 100% gerado — nunca edite ali direto, edite src/. Stdlib só
+(veja AGENTS.md); não precisa do venv.
 
 Qualquer arquivo em templates/head/ entra automaticamente no bloco
 injetado em toda página que tiver o marcador HEAD_MARKER — não precisa
