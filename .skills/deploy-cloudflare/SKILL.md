@@ -1,16 +1,18 @@
 # Skill — Deploy Cloudflare
 
-Caminho padrão do projeto. Fonte canônica das instruções de verdade:
-`README.md` (seções "Local" e "Deploy") e `AGENTS.md` na raiz do
-projeto — leia e siga aqueles, este arquivo só existe pra manter o mesmo
-formato de "uma skill por plataforma" que os outros provedores usam.
+Um dos provedores suportados — o único com camada extra no repo
+(`worker.js` + `wrangler.jsonc`). Fonte canônica: `README.md` (seções
+"Local" e "Deploy") e `AGENTS.md`. Este arquivo existe pra manter o
+mesmo formato de "uma skill por plataforma".
 
-Resumo rápido: `npm run dev` (local), `npm run deploy:staging` /
-`npm run deploy` (produção) — cada um já roda o build (`src/` → `public/`)
-sozinho antes.
+O init (`utils/init.py`) **não** é específico da Cloudflare: ele só
+preenche os `name` do Wrangler para o caso de este caminho ser o
+escolhido. Publicação em Vercel/Netlify ignora esses arquivos.
 
-Único caminho com asset binding próprio (`worker.js`) — os outros
-provedores servem `public/` direto, sem essa camada.
+Resumo: `npm run dev` (local via Wrangler), `npm run deploy:staging` /
+`npm run deploy` (produção) — cada um já roda o build (`src/` → `public/`).
+
+Os outros provedores servem `public/` direto, sem Worker.
 
 ## Outros provedores já implementados
 

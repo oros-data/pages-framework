@@ -1,10 +1,32 @@
 # pages-framework
 
-Esqueleto de deploy pra páginas rápidas (HTML + JS quando precisar) em
-Cloudflare Workers, com ambiente de staging e produção separados desde o
-início — e um passo de build que gera páginas prontas pra qualquer host
-estático (Cloudflare, Netlify, Vercel, Hostinger via FTP, etc.), não só
-Cloudflare.
+Template de páginas rápidas (HTML + JS quando precisar). A fonte é
+`src/`; o build gera `public/` pronto pra **qualquer host estático**
+(Cloudflare, Netlify, Vercel, FTP, etc.). Cloudflare tem extras no
+repo (`worker.js`, Wrangler) — o restante do fluxo não depende disso.
+
+Este repositório é um **GitHub Template**. Cliente (ou a live) cria o
+projeto com **Use this template** — não com Fork. Fork liga o repo de
+volta ao esqueleto e empurra PRs pra cá; o template nasce independente.
+
+## Começar a partir do template
+
+1. No GitHub: **Use this template** → repositório novo (nome livre).
+2. Clone o repo **novo**, não este.
+3. Identidade local (não escolhe provedor, não faz login em host nenhum):
+
+```bash
+python3 utils/init.py "Nome do projeto"
+```
+
+Isso grava o slug em `package.json`, preenche os nomes de Worker no
+`wrangler.jsonc` **para o caso** de o deploy ser Cloudflare, e troca o
+título placeholder de `src/index.html` se ainda estiver o do template.
+
+4. `cp .env.example .env` e preencha `GTM_ID` (e o que mais os snippets
+   de `templates/head/` pedirem).
+5. Hospedagem é pergunta de onboarding (`.skills/onboarding/`), na hora
+   do deploy — não do init.
 
 ## Estrutura
 
@@ -19,10 +41,12 @@ Cloudflare.
   de cada página.
 - `utils/palette.py` — extrai paleta de cor de uma imagem, escreve
   `src/theme.css` (veja `AGENTS.md` pro ambiente Python).
-- `worker.js` — serve os arquivos de `public/`. Ainda sem roteamento
-  próprio; hoje é um passthrough puro pro binding `ASSETS`.
-- `wrangler.jsonc` — config de deploy, com um ambiente `staging` já
-  configurado ao lado da produção.
+- `utils/init.py` — identidade do projeto no clone (stdlib; sem venv).
+- `worker.js` — extra Cloudflare: serve `public/` via binding `ASSETS`.
+  Passthrough; os outros provedores ignoram este arquivo.
+- `wrangler.jsonc` — extra Cloudflare (produção + `staging`). Nomes
+  genéricos no template (`pages-site`); o init preenche. Sem efeito
+  em Vercel/Netlify.
 
 ## Configurar snippets (GTM e outros)
 
@@ -49,11 +73,13 @@ automaticamente em toda página no próximo build. Nenhum código a mexer.
 
 ```bash
 npm install
-npm run dev
+npm run build    # src/ → public/  (agnóstico ao provedor)
+npm run dev      # extra Cloudflare: build + wrangler dev
 ```
 
-`npm run dev` já roda o build antes (`src/` → `public/`) e depois `wrangler
-dev`, servindo exatamente como em produção.
+`npm run dev` usa Wrangler porque já está no projeto e espelha o
+Worker. Para publicar em outro host, o que importa é `public/` depois
+do build — o CLI do provedor (Vercel, Netlify, …) serve essa pasta.
 
 **Se `npm install` falhar** compilando `sharp` (dependência do
 `netlify-cli`, só usada num recurso opcional de otimização de imagem no
@@ -63,15 +89,17 @@ Confirmado que o deploy continua funcionando normal sem isso.
 
 ## Deploy
 
-Cloudflare é o padrão do projeto (`worker.js` + `wrangler.jsonc`):
+Não há provedor padrão de publicação. Cada um tem skill em
+`.skills/deploy-<nome>/` (login, staging vs produção, o que muda).
+
+Cloudflare (`worker.js` + `wrangler.jsonc`) — extras no repo:
 
 ```bash
 npm run deploy:staging   # ambiente de staging
 npm run deploy           # produção
 ```
 
-Outros provedores, cada um com skill própria (ver `.skills/deploy-<nome>/`
-pra detalhe, login, e o que muda de conceito):
+Outros provedores (servem `public/` direto):
 
 ```bash
 npm run deploy:vercel:staging   # Vercel — preview
@@ -93,6 +121,19 @@ serve tanto pra Cloudflare (via `worker.js`) quanto subida direta em
 Netlify, Vercel, ou por FTP numa hospedagem tradicional (Hostinger, por
 exemplo) — só WordPress fica de fora, por ser CMS dinâmico, não site
 estático.
+
+## Atualizar a partir do esqueleto (opcional)
+
+O template não puxa commits sozinho. No repo do cliente:
+
+```bash
+git remote add upstream git@github.com:oros-data/pages-framework.git
+git fetch upstream
+git merge upstream/master
+```
+
+Evite misturar página do cliente com arquivos do esqueleto no mesmo
+commit — o merge fica mais simples.
 
 ## Próximos passos
 

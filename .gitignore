@@ -10,7 +10,7 @@ public/
 __pycache__/
 
 # conteúdo real do cliente (imagem de marca, referência) — só a estrutura
-# de pasta é do template, o conteúdo é específico de quem fork/clonar
+# de pasta é do template, o conteúdo é de quem usou "Use this template"
 references/company/images/*
 !references/company/images/.gitkeep
 references/inspiration/*

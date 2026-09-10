@@ -10,21 +10,25 @@ do cliente.
 
 ---
 
+Antes da hospedagem: se o repo ainda está com o nome genérico do
+template (`pages-framework` / Worker `pages-site`), rode o init
+(`python3 utils/init.py "Nome do projeto"`). Isso só grava identidade
+local (slug, títulos, nomes de Worker **caso** o deploy seja Cloudflare).
+Não pergunta nem configura provedor.
+
 ## 1. Hospedagem
 
 **Pergunta:** onde a página vai ser publicada?
 
-- **Cloudflare** (padrão do projeto) → segue `.skills/deploy-cloudflare/`.
-  Nada extra a decidir, é o caminho já implementado e testado.
-- **Outro provedor** (Netlify, Vercel, hospedagem tradicional/FTP, etc.) →
-  procure `.skills/deploy-<provedor>/`.
-  - **Existe:** siga aquela skill.
-  - **Não existe ainda:** avise o cliente/usuário que esse caminho não
-    foi construído — `public/` já sai pronto pra qualquer host estático
-    (ver `README.md`), mas o script/skill de deploy específico daquele
-    provedor ainda não existe. Só construa depois de confirmado que vai
-    ser usado de verdade — não constrói especulativamente pra provedor
-    nenhum sem cliente real pedindo.
+Não há provedor padrão de publicação. `public/` sai igual pra qualquer
+host estático. Cloudflare só tem extras locais (`worker.js`,
+`wrangler.jsonc`, `npm run dev`).
+
+- **Cloudflare** → `.skills/deploy-cloudflare/`.
+- **Vercel / Netlify / outro com skill** → `.skills/deploy-<provedor>/`.
+- **Ainda não existe skill** (ex.: FTP/Hostinger): avise que o caminho
+  de deploy específico não foi construído — `public/` já serve pra
+  subir na mão. Só construa skill depois de cliente real pedindo.
 
 ## 2. Marca / identidade visual
 
@@ -33,8 +37,7 @@ como base?
 
 - **Sim** → peça o link do site.
   - Use como referência de **modelo de negócio e copy** por padrão —
-    não a estética (mesma lógica usada na LP do Teuzin: entender o
-    produto/mensagem, não copiar layout).
+    não a estética (entender produto/mensagem, não copiar layout).
   - Pergunte explicitamente se o cliente quer manter a estética atual
     também — só nesse caso a estética do site vira referência.
 - **Não** → pergunta seguinte:

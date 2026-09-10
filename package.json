@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "init": "python3 utils/init.py",
     "build": "utils/venv/bin/python utils/build.py",
     "dev": "npm run build && wrangler dev",
     "deploy": "npm run build && wrangler deploy",

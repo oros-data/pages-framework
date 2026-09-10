@@ -15,7 +15,7 @@ lógica do Cloudflare (ver `.skills/deploy-cloudflare/`).
 }
 ```
 
-`cleanUrls` tira o `.html` da URL sozinho (`/teuzin.html` vira `/teuzin`)
+`cleanUrls` tira o `.html` da URL sozinho (`/sobre.html` vira `/sobre`)
 — mesmo comportamento que já víamos por padrão na Cloudflare.
 
 ## Pré-requisito: login (não dá pra automatizar)

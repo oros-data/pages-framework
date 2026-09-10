@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "oros-pages",
+  "name": "pages-site",
   "main": "worker.js",
   "compatibility_date": "2026-09-07",
   "observability": {
@@ -13,7 +13,7 @@
   },
   "env": {
     "staging": {
-      "name": "oros-pages-staging",
+      "name": "pages-site-staging",
       "main": "worker.js",
       "assets": {
         "directory": "./public",
